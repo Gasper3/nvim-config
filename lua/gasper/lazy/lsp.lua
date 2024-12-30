@@ -15,10 +15,32 @@ return {
     },
 
     config = function()
-        require("conform").setup({
+        local conform = require("conform")
+        conform.setup({
             formatters_by_ft = {
+                go = { 'gofmt', 'goimports', 'gofumpt', 'golines' },
+                css = { "prettier" },
+                html = { "prettier" },
+                json = { "prettier" },
+                yaml = { "prettier" },
+                markdown = { "prettier" },
+                lua = { "stylua" },
+                templ = {"templ"},
+            },
+            formatters = {
+                golines = {
+                    prepend_args = { "-m", "80" },
+                }
             }
         })
+        vim.keymap.set({ "n", "v" }, "<leader>cf", function()
+            conform.format({
+                lsp_fallback = true,
+                async = false,
+                timeout_ms = 1000,
+            })
+        end)
+
         local cmp = require('cmp')
         local cmp_lsp = require("cmp_nvim_lsp")
         local capabilities = vim.tbl_deep_extend(
@@ -90,7 +112,7 @@ return {
             mapping = cmp.mapping.preset.insert({
                 ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
                 ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
-                ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+                ['<CR>'] = cmp.mapping.confirm({ select = true }),
                 ["<C-Space>"] = cmp.mapping.complete(),
             }),
             sources = cmp.config.sources({
